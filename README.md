@@ -7,5 +7,5 @@ An operating system that is just a trollface. Install this on a machine to surpr
 On Ubuntu:
 
 ```
-sudo apt install grub-pc-bin xorriso nasm
+sudo apt install gnu-efi
 ```

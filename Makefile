@@ -1,17 +1,23 @@
-all: build/image.iso
+EFI_CRT=/usr/lib32/crt0-efi-ia32.o
+EFI_LDS=/usr/lib32/elf_ia32_efi.lds
+EFI_INCLUDE=-I/usr/include/efi/ia32
 
-build/image.iso: build/entry.bin grub.cfg
-	mkdir -p build/isodir/boot/grub
-	cp grub.cfg build/isodir/boot/grub
-	cp build/entry.bin build/isodir/boot
-	grub-mkrescue -o build/image.iso build/isodir
+all: build/main.efi
 
-build/entry.bin: build/entry.o linker.ld
-	ld build/entry.o -T linker.ld -e multiboot_header --oformat binary -s -o build/entry.bin
-	
-build/entry.o: entry.s
+build/main.efi: build/main.so
+	objcopy -j .text -j .sdata -j .data -j .dynamic \
+		-j .dynsym  -j .rel -j .rela -j .reloc \
+		--target=efi-app-ia32 build/main.so build/main.efi
+
+
+build/main.so: build/main.o
+	ld -nostdlib -znocombreloc -T $(EFI_LDS) -shared -Bsymbolic -L/usr/lib32 \
+		$(EFI_CRT) build/main.o -o build/main.so -lefi -lgnuefi 
+
+build/main.o: main.c
 	mkdir -p build
-	nasm -f elf64 entry.s -o build/entry.o
+	gcc -fpic -Wall -fshort-wchar -fno-strict-aliasing -fno-merge-constants -m32 -march=i686 \
+		$(EFI_INCLUDE) -c main.c -o build/main.o
 
 clean:
 	rm -rf build
