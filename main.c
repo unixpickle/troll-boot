@@ -1,5 +1,3 @@
-#undef __STDC_VERSION__
-
 #include <efi/efi.h>
 #include <efi/efilib.h>
 
