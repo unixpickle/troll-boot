@@ -1,6 +1,7 @@
 EFI_CRT=/usr/lib/crt0-efi-x86_64.o
 EFI_LDS=/usr/lib/elf_x86_64_efi.lds
 EFI_INCLUDE=-I/usr/include/efi/x86_64
+EFI_LIBS=-lefi -lgnuefi $(shell $(CC) -print-libgcc-file-name)
 
 all: build/main.efi
 
@@ -12,7 +13,7 @@ build/main.efi: build/main.so
 
 build/main.so: build/main.o
 	ld -nostdlib -znocombreloc -T $(EFI_LDS) -shared -Bsymbolic -L/usr/lib \
-		$(EFI_CRT) build/main.o -o build/main.so -lefi -lgnuefi 
+		$(EFI_CRT) build/main.o -o build/main.so $(EFI_LIBS) 
 
 build/main.o: main.c
 	mkdir -p build
